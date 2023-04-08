@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-1
+  labels:
+    app: custom-date-logger
+    environment: local
+  annotations:
+    very-clever-developer: "Yevhen Havrasiienko"
+    very-clever-developers-github: "https://github.com/llasapg"
+spec:
+  containers:
+    - name: &container1name app-container-1
+      image: alpine
+      command:
+        - /bin/sh
+        - -c
+        - |
+          i=1
+          while [ $i = 1 ]
+          do
+            sleep 1
+            echo [$(CONTAINER_NAME)] && date +"%Y-%m-%d %H:%M:%S"
+          done
+      env:
+        - name: CONTAINER_NAME
+          value: *container1name
+      resources:
+        limits:
+          cpu: 10m
+          memory: 10Mi
+        requests:
+          cpu: 5m
+          memory: 5Mi
+    - name: &container2name app-container-2
+      image: alpine
+      command:
+        - /bin/sh
+        - -c
+        - |
+          i=1
+          while [ $i = 1 ]
+          do
+            sleep 1
+            echo [$(CONTAINER_NAME)] && date +"%Y-%m-%d %H:%M:%S"
+          done
+      env:
+        - name: CONTAINER_NAME
+          value: *container2name
+      resources:
+        limits:
+          cpu: 10m
+          memory: 10Mi
+        requests:
+          cpu: 5m
+          memory: 5Mi
+  terminationGracePeriodSeconds: 1
+  restartPolicy: OnFailure

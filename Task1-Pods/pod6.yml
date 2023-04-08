@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-1
+  labels:
+    app: custom-date-logger
+    environment: local
+  annotations:
+    very-clever-developer: "Yevhen Havrasiienko"
+    very-clever-developers-github: "https://github.com/llasapg"
+spec:
+  containers:
+    - name: app-container-1
+      image: alpine
+      command:
+        - /bin/sh
+        - -c
+        - |
+          echo $HOSTNAME
+          echo appName is $APP and developer is $DEVELOPER
+          i=1
+          while [ $i = 1 ]
+          do
+            sleep 1
+            date +"%Y-%m-%d %H:%M:%S"
+          done
+      env:
+        - name: ALPHABET
+          value: "Uganda language"
+        - name: LETTERS_COUNT
+          value: "18"
+        - name: APP
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['app']
+        - name: DEVELOPER
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['very-clever-developer']
+      resources:
+        limits:
+          cpu: 10m
+          memory: 10Mi
+        requests:
+          cpu: 5m
+          memory: 5Mi
+  terminationGracePeriodSeconds: 1
+  restartPolicy: OnFailure
