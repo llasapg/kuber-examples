@@ -42,6 +42,7 @@ spec:
           echo "some text" >> custom-file.txt
           pwd && ls | grep custom-file.txt
           cat custom-file.txt
+          chmod 777 custom-file.txt
           i=1
           while [ $i = 1 ]
           do

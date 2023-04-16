@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-1
+  labels:
+    app: probes-pi
+spec:
+  containers:
+    - name: app-container-1
+      ports:
+        - name: api-cont-port
+          containerPort: 80
+      image: probes-pi
+      imagePullPolicy: Never
+      env:
+        - name: filename
+          value: data.json
+      resources:
+        limits:
+          cpu: 100m
+          memory: 100Mi
+        requests:
+          cpu: 50m
+          memory: 50Mi
+      startupProbe:
+        exec:
+          command:
+          - /bin/sh
+          - -c
+          - test -e $filename
+        initialDelaySeconds: 0
+        periodSeconds: 3
+        failureThreshold: 4
+      livenessProbe:
+        tcpSocket:
+          port: api-cont-port
+        failureThreshold: 6
+        periodSeconds: 2
+      readinessProbe:
+        httpGet:
+          port: api-cont-port
+          path: /check-readiness
+        failureThreshold: 4
+        periodSeconds: 2
+        timeoutSeconds: 2
+  terminationGracePeriodSeconds: 1
+  restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-alpine
+  labels:
+    app: alpine-pod
+spec:
+  containers:
+    - name: app-container-1
+      ports:
+        - name: alpine-pod-port
+          containerPort: 80
+      image: ubuntu
+      resources:
+        limits:
+          cpu: 100m
+          memory: 100Mi
+        requests:
+          cpu: 50m
+          memory: 50Mi
+      command:
+        - /bin/sh
+        - -c
+        - |
+          i=1
+          while [ $i = 1 ]
+          do
+            sleep 2
+            echo 'Aboba'
+          done
+  terminationGracePeriodSeconds: 1
+  restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+spec:
+  selector:
+    app: probes-pi
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: api-cont-port
